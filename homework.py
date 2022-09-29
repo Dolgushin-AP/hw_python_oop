@@ -3,7 +3,7 @@ from typing import ClassVar, Dict, Sequence, Type
 
 
 @dataclass
-#dataclass правильно сделал? Почитал про него - похоже, отличная штука! )
+# dataclass правильно сделал? Почитал про него - похоже, отличная штука! )
 class InfoMessage:
     """Информационное сообщение о тренировке."""
     training_type: str
@@ -16,10 +16,11 @@ class InfoMessage:
     TRAINING_DISTANCE: ClassVar[str] = "Дистанция"
     TRAINING_MEAN_SPEED: ClassVar[str] = "Ср. скорость"
     TRAINING_CALORIE_RATE: ClassVar[str] = "Потрачено ккал"
-#в константы вынес фразы, но дальше не догнал
-#как их использовать в методе?
-#почитал по ссылкам про asdict и .format
-#что-то не доходит...
+# в константы вынес фразы, но дальше не догнал
+# как их использовать в методе?
+# почитал по ссылкам про asdict и .format
+# что-то не доходит...
+
     def get_message(self) -> str:
         return (f'Тип тренировки: {self.training_type};'
                 f' Длительность: {self.duration:.3f} ч.;'
@@ -36,7 +37,7 @@ class Training:
     weight: float
     LEN_STEP: float = 0.65
     M_IN_KM: int = 1000
-    H_IN_MIN: int = 60  #для перевода в минуты добавил константу
+    H_IN_MIN: int = 60  # для перевода в минуты добавил константу
 
     def __init__(self,
                  action: int,
@@ -57,7 +58,7 @@ class Training:
 
     def get_spent_calories(self) -> float:
         """Получить количество затраченных калорий."""
-        pass  #что-то не соображаю, как сделать
+        pass  # что-то не соображаю, как сделать
 
     def show_training_info(self) -> InfoMessage:
         """Вернуть информационное сообщение о выполненной тренировке."""
@@ -65,13 +66,13 @@ class Training:
                            self.duration,
                            self.get_distance(),
                            self.get_mean_speed(),
-                           self.get_spent_calories(),  #добавил запятую
+                           self.get_spent_calories(),  # добавил запятую
                            )
 
 
 class Running(Training):
     """Тренировка: бег."""
-#константы переименовал и записал верхним регистром
+# константы переименовал и записал верхним регистром
     CALORIE_RATE_COEFF_RUN_1: float = 18
     CALORIE_RATE_COEFF_RUN_2: float = 20
 
@@ -136,24 +137,26 @@ class Swimming(Training):
                 * self.CALORIE_RATE_COEFF_SWIM_2 * self.weight)
 
 
-#mypy подсказал мне взять Sequence вместо List. На List что-то пробухтел...
-def read_package(workout_type: str, data:Sequence[int]) -> Training:
+# mypy подсказал мне взять Sequence вместо List. На List что-то пробухтел...
+def read_package(workout_type: str, data: Sequence[int]) -> Training:
     """Прочитать данные полученные от датчиков."""
-#Type вроде норм зарядил
+# Type вроде норм зарядил
     dict_training_data: Dict[str, Type[Training]] = {
         "SWM": Swimming,
         "RUN": Running,
         "WLK": SportsWalking
     }
     if workout_type not in dict_training_data:
-        raise KeyError ("Что-то пошло не так! Проверьте указанный тип тренировки.")
+        raise KeyError ("Проверьте указанный тип тренировки.")
     return dict_training_data[workout_type](*data)
-#raise вроде работает. Тут норм?
+# raise вроде работает. Тут норм?
+
 
 def main(training: Training) -> None:
     """Главная функция."""
     info = training.show_training_info()
     print(info.get_message())
+
 
 if __name__ == '__main__':
     packages = [
