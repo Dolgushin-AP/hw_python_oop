@@ -1,18 +1,19 @@
-class InfoMessage:
-    """Информационное сообщение о тренировке."""
+from dataclasses import dataclass
+from typing import ClassVar, Dict, Sequence, Type
 
-    def __init__(self,
-                 training_type: str,
-                 duration: float,
-                 distance: float,
-                 speed: float,
-                 calories: float
-                 ) -> None:
-        self.training_type = training_type
-        self.duration = duration
-        self.distance = distance
-        self.speed = speed
-        self.calories = calories
+@dataclass
+class InfoMessage:#dataclass правильно сделал? Почитал про него - похоже, отличная штука! )
+    """Информационное сообщение о тренировке."""
+    training_type: str
+    duration: float
+    distance: float
+    speed: float
+    calories: float
+    TRAINING_TYPE: ClassVar[str] = "Тип тренировки"#в константы вынес фразы, но дальше не догнал
+    TRAINING_DURATION: ClassVar[str] = "Длительность"#как их использовать в методе?
+    TRAINING_DISTANCE: ClassVar[str] = "Дистанция"#почитал по ссылкам про asdict и .format
+    TRAINING_MEAN_SPEED: ClassVar[str] = "Ср. скорость"#что-то не доходит...
+    TRAINING_CALORIE_RATE: ClassVar[str] = "Потрачено ккал"
 
     def get_message(self) -> str:
         return (f'Тип тренировки: {self.training_type};'
@@ -25,9 +26,12 @@ class InfoMessage:
 
 class Training:
     """Базовый класс тренировки."""
-
+    action: int
+    duration: float
+    weight: float
     LEN_STEP: float = 0.65
     M_IN_KM: int = 1000
+    H_IN_MIN: int = 60#для перевода в минуты добавил константу
 
     def __init__(self,
                  action: int,
@@ -48,7 +52,7 @@ class Training:
 
     def get_spent_calories(self) -> float:
         """Получить количество затраченных калорий."""
-        pass
+        pass#что-то не соображаю, как сделать
 
     def show_training_info(self) -> InfoMessage:
         """Вернуть информационное сообщение о выполненной тренировке."""
@@ -56,28 +60,28 @@ class Training:
                            self.duration,
                            self.get_distance(),
                            self.get_mean_speed(),
-                           self.get_spent_calories()
+                           self.get_spent_calories(),#добавил запятую
                            )
 
 
 class Running(Training):
     """Тренировка: бег."""
 
-    run_calorie_1: float = 18
-    run_calorie_2: float = 20
+    CALORIE_RATE_COEFF_RUN_1: float = 18#константы переименовал и записал верхним регистром
+    CALORIE_RATE_COEFF_RUN_2: float = 20
 
     def get_spent_calories(self) -> float:
         """Получить количество затраченных калорий."""
-        return ((self.run_calorie_1 * self.get_mean_speed()
-                - self.run_calorie_2)
-                * self.weight / self.M_IN_KM * self.duration * 60)
+        return ((self.CALORIE_RATE_COEFF_RUN_1 * self.get_mean_speed()
+                - self.CALORIE_RATE_COEFF_RUN_2)
+                * self.weight / self.M_IN_KM * self.duration * self.H_IN_MIN)
 
 
 class SportsWalking(Training):
     """Тренировка: спортивная ходьба."""
-
-    walk_calorie_1: float = 0.035
-    walk_calorie_2: float = 0.029
+    height: float
+    CALORIE_RATE_COEFF_WALK_1: float = 0.035
+    CALORIE_RATE_COEFF_WALK_2: float = 0.029
 
     def __init__(self,
                  action: int,
@@ -90,17 +94,20 @@ class SportsWalking(Training):
 
     def get_spent_calories(self) -> float:
         """Получить количество затраченных калорий."""
-        return ((self.walk_calorie_1 * self.weight + (self.get_mean_speed()**2
-                // self.height) * self.walk_calorie_2
-                * self.weight) * self.duration * 60)
+        return ((self.CALORIE_RATE_COEFF_WALK_1 * self.weight
+                + (self.get_mean_speed()**2 // self.height)
+                * self.CALORIE_RATE_COEFF_WALK_2
+                * self.weight) * self.duration * self.H_IN_MIN)
 
 
 class Swimming(Training):
     """Тренировка: плавание."""
 
+    length_pool: float
+    count_pool: float
     LEN_STEP: float = 1.38
-    swim_calorie_1: float = 1.1
-    swim_calorie_2: float = 2
+    CALORIE_RATE_COEFF_SWIM_1: float = 1.1
+    CALORIE_RATE_COEFF_SWIM_2: float = 2
 
     def __init__(self,
                  action: int,
@@ -120,25 +127,25 @@ class Swimming(Training):
 
     def get_spent_calories(self) -> float:
         """Получить количество затраченных калорий."""
-        return ((self.get_mean_speed() + self.swim_calorie_1)
-                * self.swim_calorie_2 * self.weight)
+        return ((self.get_mean_speed() + self.CALORIE_RATE_COEFF_SWIM_1)
+                * self.CALORIE_RATE_COEFF_SWIM_2 * self.weight)
 
 
-def read_package(workout_type: str, data: list) -> Training:
+def read_package(workout_type: str, data:Sequence[int]) -> Training:#mypy подсказал мне взять Sequence вместо List. На List что-то пробухтел...
     """Прочитать данные полученные от датчиков."""
-    dict_workout = {
+    dict_training_data: Dict[str, Type[Training]] = {#Type вроде норм зарядил
         "SWM": Swimming,
         "RUN": Running,
         "WLK": SportsWalking
     }
-    return dict_workout[workout_type](*data)
-
+    if workout_type not in dict_training_data:
+        raise KeyError ("Что-то пошло не так! Проверьте указанный тип тренировки.")#raise вроде работает. Тут норм?
+    return dict_training_data[workout_type](*data)
 
 def main(training: Training) -> None:
     """Главная функция."""
     info = training.show_training_info()
     print(info.get_message())
-
 
 if __name__ == '__main__':
     packages = [
