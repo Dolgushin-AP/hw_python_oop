@@ -147,7 +147,7 @@ def read_package(workout_type: str, data: Sequence[int]) -> Training:
         "WLK": SportsWalking
     }
     if workout_type not in dict_training_data:
-        raise KeyError ("Проверьте указанный тип тренировки.")
+        raise KeyError("Проверьте указанный тип тренировки.")
     return dict_training_data[workout_type](*data)
 # raise вроде работает. Тут норм?
 
