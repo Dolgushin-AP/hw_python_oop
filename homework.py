@@ -138,7 +138,7 @@ def read_package(workout_type: str, data: Sequence[int]) -> Training:
     }
     if workout_type not in task_data:
         raise ValueError(
-                         f'{workout_type} не предусмотрена программой')
+            f'{workout_type} не предусмотрена программой')
     return task_data[workout_type](*data)
 
 
